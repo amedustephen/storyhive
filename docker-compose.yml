@@ -1,0 +1,37 @@
+version: '3'
+services:
+  database:
+    image: postgres:15.2-alpine
+    container_name: postgres-15.2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: 
+      "postgres -c 'max_connections=500'"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: "./bin/rails server"
+    environment:
+      - RAILS_ENV=${RAILS_ENV}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+    volumes:
+      - ./backend:/rails
+    depends_on:
+      - database
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data: {}
+
